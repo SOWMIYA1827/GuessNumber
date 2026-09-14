@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyScript Guessing Game</title>
+
+    <!-- PyScript Core Engine CDN -->
+    <link rel="stylesheet"
+          href="https://pyscript.net/releases/2025.3.1/core.css">
+
+    <script type="module"
+            src="https://pyscript.net/releases/2025.3.1/core.js">
+    </script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            height: 100vh;
+            margin: 0;
+        }
+
+        .game-container {
+            background: white;
+            padding: 35px;
+
+            border-radius: 20px;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+
+            text-align: center;
+
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #5a3fbf;
+            margin-bottom: 8px;
+            font-size: 32px;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+
+        input[type="number"] {
+            width: 80%;
+            padding: 13px;
+
+            font-size: 17px;
+
+            border: 2px solid #c7b8ff;
+            border-radius: 10px;
+
+            outline: none;
+
+            margin-bottom: 18px;
+
+            text-align: center;
+        }
+
+        input[type="number"]:focus {
+            border-color: #6c5ce7;
+
+            box-shadow: 0 0 8px rgba(108, 92, 231, 0.4);
+        }
+
+        button {
+            background: linear-gradient(90deg, #6c5ce7, #8e44ad);
+
+            color: white;
+
+            border: none;
+
+            padding: 13px 25px;
+
+            font-size: 17px;
+
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            width: 87%;
+
+            font-weight: bold;
+
+            transition: 0.3s;
+
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            transform: scale(1.03);
+        }
+
+        button:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Replay button */
+        #replayBtn {
+            background: linear-gradient(90deg, #00b894, #00cec9);
+        }
+
+        .message {
+            margin-top: 22px;
+
+            font-weight: 600;
+
+            font-size: 17px;
+
+            min-height: 24px;
+
+            color: #e67e22;
+        }
+
+        .win-style {
+            color: #16a085;
+
+            font-size: 19px;
+
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="game-container">
+
+    <h1>🎯 Play The Game</h1>
+
+    <p>Guess The Number Between 1 and 100</p>
+
+    <input
+        type="number"
+        id="userGuess"
+        placeholder="Enter Your Number"
+        min="1"
+        max="100"
+    >
+
+    <button id="submitBtn">
+        Submit Guess 🚀
+    </button>
+
+    <!-- Replay button -->
+    <button id="replayBtn" style="display: none;">
+        Replay Game 🔄
+    </button>
+
+    <div id="messageDisplay" class="message"></div>
+
+</div>
+
+
+<script type="py">
+
+import random
+from pyscript import document, when
+
+
+# Generate secret number
+num = random.randint(1, 100)
+
+# Count attempts
+attempts = 0
+
+
+# -----------------------------
+# CHECK GUESS
+# -----------------------------
+
+@when("click", "#submitBtn")
+def check_guess(event):
+
+    global num, attempts
+
+    # Get HTML elements
+    input_element = document.querySelector("#userGuess")
+    message_element = document.querySelector("#messageDisplay")
+    button_element = document.querySelector("#submitBtn")
+    replay_button = document.querySelector("#replayBtn")
+
+    # Get user input
+    user_input = input_element.value.strip()
+
+    # Empty input
+    if not user_input:
+
+        message_element.innerText = "⚠️ Please enter a number."
+
+        return
+
+
+    # Convert input to integer
+    try:
+
+        x = int(user_input)
+
+    except:
+
+        message_element.innerText = "⚠️ Please enter a valid number."
+
+        input_element.value = ""
+
+        return
+
+
+    # Check range
+    if x < 1 or x > 100:
+
+        message_element.innerText = "⚠️ Enter a number between 1 and 100."
+
+        input_element.value = ""
+
+        return
+
+
+    # Increase attempts
+    attempts += 1
+
+
+    # Compare guess
+    if x > num:
+
+        message_element.innerText = "⬆️ Your Number is HIGHER!"
+
+
+    elif x < num:
+
+        message_element.innerText = "⬇️ Your Number is LOWER!"
+
+
+    else:
+
+        # Player wins
+        message_element.className = "message win-style"
+
+        message_element.innerText = (
+            f"🎉 Hurray! You Found It! "
+            f"You Win the Game in {attempts} attempts!"
+        )
+
+        # Disable guessing
+        input_element.disabled = True
+        button_element.disabled = True
+
+        # Show replay button
+        replay_button.style.display = "block"
+
+
+    # Clear input
+    input_element.value = ""
+
+
+# -----------------------------
+# REPLAY GAME
+# -----------------------------
+
+@when("click", "#replayBtn")
+def replay_game(event):
+
+    global num, attempts
+
+    # Generate new random number
+    num = random.randint(1, 100)
+
+    # Reset attempts
+    attempts = 0
+
+    # Get HTML elements
+    input_element = document.querySelector("#userGuess")
+    message_element = document.querySelector("#messageDisplay")
+    button_element = document.querySelector("#submitBtn")
+    replay_button = document.querySelector("#replayBtn")
+
+    # Enable game again
+    input_element.disabled = False
+    button_element.disabled = False
+
+    # Clear input
+    input_element.value = ""
+
+    # Clear message
+    message_element.innerText = ""
+    message_element.className = "message"
+
+    # Hide replay button
+    replay_button.style.display = "none"
+
+
+</script>
+
+</body>
+</html>
